@@ -1,0 +1,12 @@
+[package]
+name = "pinors"
+version = "0.1.0"
+authors = ["pinosaur"]
+description = ""
+repository = "https://github.com/MrPicklePinosaur/matsuba"
+edition = "2018"
+
+[workspace]
+members = ["crates/*"]
+
+[dependencies]
