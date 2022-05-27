@@ -6,4 +6,5 @@ Collection of utility crates. General theme is to be lightweight and have low
 
 - `argparse`: simple cli builder library
 - `error`: error handling utilities
+- `table`: prints structs in a table format
 
