@@ -15,13 +15,13 @@ pub struct Cli {
     pub program_name: &'static str,
     pub synopsis: &'static str,
     pub root_command: Command,
-    pub commands: Vec<Command>,
+    pub subcommands: Vec<Command>,
     pub global_flags: Vec<Flag>,
 }
 
 pub struct Command {
-    pub desc: &'static str,
     pub command_name: &'static str,
+    pub desc: &'static str,
     pub handler: HandlerFn,
     pub flags: Vec<Flag>,
     // pub args: u8, // TODO could make this take named argument names
@@ -40,6 +40,26 @@ pub struct FlagParse<'a> {
     pub args: Vec<String>,
 }
 
+impl Default for Cli {
+    fn default() -> Self {
+        Cli {
+            program_name: "myprogram",
+            synopsis: "a cli program",
+            root_command: Command {
+                command_name: "hello",
+                desc: "hello world command",
+                handler: |_flagparse: FlagParse| {
+                    println!("hello world!");
+                    Ok(())
+                },
+                flags: vec![]
+            },
+            subcommands: vec![],
+            global_flags: vec![]
+        }
+    }
+}
+
 impl Cli {
     
     pub fn run(&self, args: &Vec<String>) -> BoxResult<()> {
@@ -49,7 +69,7 @@ impl Cli {
 
         // find command to dispatch
         let cmd: &Command = if let Some(cmd_name) = arg_it.next() {
-            self.commands
+            self.subcommands
                 .iter()
                 .find(|c| &c.command_name == cmd_name).ok_or(Error::InvalidCommand)?
         } else {
