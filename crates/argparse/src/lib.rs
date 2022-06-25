@@ -9,13 +9,12 @@ use error::{BoxResult, Error};
 
 // mini argparsing library
 
-type Commands = Vec<Command>;
-// type HandlerFn = fn(arg_it: dyn Iterator<Item = String>);
 type HandlerFn = fn(flagparse: FlagParse) -> BoxResult<()>;
 
 pub struct Cli {
     pub program_name: &'static str,
     pub synopsis: &'static str,
+    pub root_command: Command,
     pub commands: Vec<Command>,
     pub global_flags: Vec<Flag>,
 }
@@ -47,12 +46,15 @@ impl Cli {
         
         let mut arg_it = args.iter();
         arg_it.next(); // skip program name
-        let cmd_name = arg_it.next().ok_or(Error::InvalidCommand)?;
 
         // find command to dispatch
-        let cmd: &Command = self.commands
-            .iter()
-            .find(|c| &c.command_name == cmd_name).ok_or(Error::InvalidCommand)?;
+        let cmd: &Command = if let Some(cmd_name) = arg_it.next() {
+            self.commands
+                .iter()
+                .find(|c| &c.command_name == cmd_name).ok_or(Error::InvalidCommand)?
+        } else {
+            &self.root_command 
+        };
 
         // parse flags for command
         let mut flagparse = FlagParse::new();
@@ -116,7 +118,7 @@ impl Flag {
             desc: String::new(),
             required: false,
             parameter: false,
-            short: short,
+            short,
             long: None,
         }
     }

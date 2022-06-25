@@ -10,3 +10,8 @@ edition = "2018"
 members = ["crates/*"]
 
 [dependencies]
+
+[lib]
+name = "argparse"
+path = "crates/argparse/src/lib.rs"
+crate-type = ["lib"]
