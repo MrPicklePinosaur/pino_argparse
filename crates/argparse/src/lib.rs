@@ -43,19 +43,26 @@ pub struct FlagParse<'a> {
 impl Default for Cli {
     fn default() -> Self {
         Cli {
-            program_name: "myprogram",
-            synopsis: "a cli program",
+            program_name: "",
+            synopsis: "",
             root_command: Command {
-                command_name: "hello",
-                desc: "hello world command",
-                handler: |_flagparse: FlagParse| {
-                    println!("hello world!");
-                    Ok(())
-                },
-                flags: vec![]
+                ..Default::default()
             },
             subcommands: vec![],
             global_flags: vec![]
+        }
+    }
+}
+
+impl Default for Command {
+    fn default() -> Self {
+        Command {
+            command_name: "",
+            desc: "",
+            handler: |_flagparse: FlagParse| {
+                Ok(())
+            },
+            flags: vec![]
         }
     }
 }
@@ -68,10 +75,16 @@ impl Cli {
         arg_it.next(); // skip program name
 
         // find command to dispatch
-        let cmd: &Command = if let Some(cmd_name) = arg_it.next() {
-            self.subcommands
-                .iter()
-                .find(|c| &c.command_name == cmd_name).ok_or(Error::InvalidCommand)?
+        let mut next = arg_it.next();
+        let cmd: &Command = if let Some(cmd_name) = next {
+            if looks_like_flag(cmd_name) {
+                &self.root_command
+            } else {
+                next = arg_it.next();
+                self.subcommands
+                    .iter()
+                    .find(|c| &c.command_name == cmd_name).unwrap_or(&self.root_command)
+            }
         } else {
             &self.root_command 
         };
@@ -79,7 +92,6 @@ impl Cli {
         // parse flags for command
         let mut flagparse = FlagParse::new();
 
-        let mut next = arg_it.next();
         while next.is_some() {
 
             let cur_arg = next.unwrap();
@@ -129,6 +141,10 @@ impl Cli {
 
     }
 
+}
+
+fn looks_like_flag(token: &str) -> bool {
+    return token.starts_with("--") || token.starts_with("-")
 }
 
 impl Flag {
