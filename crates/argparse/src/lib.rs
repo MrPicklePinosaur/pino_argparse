@@ -1,3 +1,7 @@
+//! Simple arg parsing library.
+//!
+//! Provide a schema for your cli application and attach handlers to each command. Query for flags
+//! values with support for short and long flag names, as well as optional parameters.
 
 mod error;
 
@@ -7,36 +11,56 @@ use std::option::Option;
 
 use error::{BoxResult, Error};
 
-// mini argparsing library
-
+/// Command handler functions take in the `FlagParse` struct which contains information on received
+/// flags.
 type HandlerFn = fn(flagparse: FlagParse) -> BoxResult<()>;
 
+/// Base struct to define the schema for your cli application.
 pub struct Cli {
+    /// Name of your application
     pub program_name: &'static str,
+    /// Brief description of your application
     pub synopsis: &'static str,
+    /// Command handler if no subcommand is passed
     pub root_command: Command,
+    /// List of subcommand handlers
     pub subcommands: Vec<Command>,
+    /// WIP: Flags that will be parsed regardless of the command
     pub global_flags: Vec<Flag>,
 }
 
+/// Struct describing a command
 pub struct Command {
     pub command_name: &'static str,
     pub desc: &'static str,
+    /// Attached Handler function
     pub handler: HandlerFn,
+    /// List of flags the command can take
     pub flags: Vec<Flag>,
     // pub args: u8, // TODO could make this take named argument names
 }
 
+/// Information on a flag
 pub struct Flag {
     pub desc: String,
+    /// If the flag is required to be passed
     pub required: bool,
+    /// If the flag will take in a parameter
     pub parameter: bool,
+    /// Short flag name
+    ///
+    /// Short flags can be passed with a single dash. For example `-v`.
     pub short: char,
+    /// Long flag name
+    ///
+    /// Long names are passed with a double dash. For example `--verbose`.
     pub long: Option<String>,
 }
 
+/// Parsed flag information
 pub struct FlagParse<'a> {
     flags: Vec<(&'a Flag, Option<String>)>,
+    /// List of any non-flag arguments that were picked up.
     pub args: Vec<String>,
 }
 
@@ -69,6 +93,9 @@ impl Default for Command {
 
 impl Cli {
     
+    /// Start the cli. 
+    ///
+    /// Pass in the environment arguments.
     pub fn run(&self, args: &Vec<String>) -> BoxResult<()> {
         
         let mut arg_it = args.iter();
@@ -149,6 +176,9 @@ fn looks_like_flag(token: &str) -> bool {
 
 impl Flag {
 
+    /// Construct a new flag
+    ///
+    /// The flag is required to a have a short name
     pub fn new(short: char) -> Self {
         Flag {
             desc: String::new(),
@@ -159,18 +189,22 @@ impl Flag {
         }
     }
 
+    /// Specify the description
     pub fn desc(mut self, desc: &str) -> Self {
         self.desc = desc.to_string();
         self
     }
+    /// Specify if the flag is required or not
     pub fn required(mut self) -> Self {
         self.required = true;
         self
     }
+    /// Specify if the flag takes in a parameter
     pub fn parameter(mut self) -> Self {
         self.parameter = true;
         self
     }
+    /// Specify an optional long name for the flag
     pub fn long(mut self, long: &str) -> Self {
         self.long = Some(long.to_string());
         self
@@ -180,6 +214,11 @@ impl Flag {
 
 impl<'a> FlagParse<'a> {
 
+    /// Get the parameter of a flag
+    ///
+    /// Will return `None` if flag was not passed or the flag did not take parameters.
+    /// TODO: should return a specific error if flag does not exist or if flag did not take
+    /// parameters.
     pub fn get_flag_value<T: FromStr>(&self, short: char) -> Option<T> {
         let pair = self.flags.iter().find(|p| p.0.short == short);
         if pair.is_none() { return None; }
@@ -191,6 +230,7 @@ impl<'a> FlagParse<'a> {
         }
     }
 
+    /// Check if a flag was passed
     pub fn get_flag(&self, short: char) -> bool {
         return self.flags.iter().find(|p| p.0.short == short).is_some();
     }
