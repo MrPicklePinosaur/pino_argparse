@@ -50,11 +50,11 @@ pub struct Flag {
     /// Short flag name
     ///
     /// Short flags can be passed with a single dash. For example `-v`.
-    pub short: char,
+    pub short: Option<char>,
     /// Long flag name
     ///
     /// Long names are passed with a double dash. For example `--verbose`.
-    pub long: Option<String>,
+    pub long: String,
 }
 
 /// Parsed flag information
@@ -125,9 +125,9 @@ impl Cli {
 
             let flag: Option<&Flag> = if cur_arg.starts_with("--") {
                 // TODO maybe unneeded copy
-                cmd.flags.iter().find(|f| f.long == Some(cur_arg[2..].to_string()))
+                cmd.flags.iter().find(|f| f.long == cur_arg[2..].to_string())
             } else if cur_arg.starts_with("-") {
-                cmd.flags.iter().find(|f| Some(f.short) == cur_arg.chars().nth(1))
+                cmd.flags.iter().find(|f| f.short == cur_arg.chars().nth(1))
             } else {
                 break;
             };
@@ -179,19 +179,19 @@ impl Flag {
     /// Construct a new flag
     ///
     /// The flag is required to a have a short name
-    pub fn new(short: char) -> Self {
+    pub fn new(long: &str) -> Self {
         Flag {
             desc: String::new(),
             required: false,
             parameter: false,
-            short,
-            long: None,
+            short: None,
+            long: long.to_owned(),
         }
     }
 
     /// Specify the description
     pub fn desc(mut self, desc: &str) -> Self {
-        self.desc = desc.to_string();
+        self.desc = desc.to_owned();
         self
     }
     /// Specify if the flag is required or not
@@ -204,9 +204,9 @@ impl Flag {
         self.parameter = true;
         self
     }
-    /// Specify an optional long name for the flag
-    pub fn long(mut self, long: &str) -> Self {
-        self.long = Some(long.to_string());
+    /// Specify an optional short name for the flag
+    pub fn short(mut self, short: char) -> Self {
+        self.short = Some(short);
         self
     }
 
@@ -219,8 +219,8 @@ impl<'a> FlagParse<'a> {
     /// Will return `None` if flag was not passed or the flag did not take parameters.
     /// TODO: should return a specific error if flag does not exist or if flag did not take
     /// parameters.
-    pub fn get_flag_value<T: FromStr>(&self, short: char) -> Option<T> {
-        let pair = self.flags.iter().find(|p| p.0.short == short);
+    pub fn get_flag_value<T: FromStr>(&self, long: &str) -> Option<T> {
+        let pair = self.flags.iter().find(|p| p.0.long.eq(long));
         if pair.is_none() { return None; }
         let pair = pair.unwrap();
 
@@ -231,8 +231,8 @@ impl<'a> FlagParse<'a> {
     }
 
     /// Check if a flag was passed
-    pub fn get_flag(&self, short: char) -> bool {
-        return self.flags.iter().find(|p| p.0.short == short).is_some();
+    pub fn get_flag(&self, long: &str) -> bool {
+        return self.flags.iter().find(|p| p.0.long.eq(long)).is_some();
     }
 
     fn new() -> Self {
@@ -251,4 +251,3 @@ impl<'a> FlagParse<'a> {
     }
 
 }
-
