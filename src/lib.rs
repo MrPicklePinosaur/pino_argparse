@@ -5,9 +5,9 @@
 
 mod error;
 
+use std::option::Option;
 use std::str::FromStr;
 use std::vec::Vec;
-use std::option::Option;
 
 use error::{BoxResult, Error};
 
@@ -73,7 +73,7 @@ impl Default for Cli {
                 ..Default::default()
             },
             subcommands: vec![],
-            global_flags: vec![]
+            global_flags: vec![],
         }
     }
 }
@@ -83,21 +83,17 @@ impl Default for Command {
         Command {
             command_name: "",
             desc: "",
-            handler: |_flagparse: FlagParse| {
-                Ok(())
-            },
-            flags: vec![]
+            handler: |_flagparse: FlagParse| Ok(()),
+            flags: vec![],
         }
     }
 }
 
 impl Cli {
-    
-    /// Start the cli. 
+    /// Start the cli.
     ///
     /// Pass in the environment arguments.
     pub fn run(&self, args: &Vec<String>) -> BoxResult<()> {
-        
         let mut arg_it = args.iter();
         arg_it.next(); // skip program name
 
@@ -110,22 +106,24 @@ impl Cli {
                 next = arg_it.next();
                 self.subcommands
                     .iter()
-                    .find(|c| &c.command_name == cmd_name).unwrap_or(&self.root_command)
+                    .find(|c| &c.command_name == cmd_name)
+                    .unwrap_or(&self.root_command)
             }
         } else {
-            &self.root_command 
+            &self.root_command
         };
 
         // parse flags for command
         let mut flagparse = FlagParse::new();
 
         while next.is_some() {
-
             let cur_arg = next.unwrap();
 
             let flag: Option<&Flag> = if cur_arg.starts_with("--") {
                 // TODO maybe unneeded copy
-                cmd.flags.iter().find(|f| f.long == cur_arg[2..].to_string())
+                cmd.flags
+                    .iter()
+                    .find(|f| f.long == cur_arg[2..].to_string())
             } else if cur_arg.starts_with("-") {
                 cmd.flags.iter().find(|f| f.short == cur_arg.chars().nth(1))
             } else {
@@ -164,18 +162,14 @@ impl Cli {
         Ok(())
     }
 
-    pub fn help_message(&self) {
-
-    }
-
+    pub fn help_message(&self) {}
 }
 
 fn looks_like_flag(token: &str) -> bool {
-    return token.starts_with("--") || token.starts_with("-")
+    return token.starts_with("--") || token.starts_with("-");
 }
 
 impl Flag {
-
     /// Construct a new flag
     ///
     /// The flag is required to a have a short name
@@ -209,11 +203,9 @@ impl Flag {
         self.short = Some(short);
         self
     }
-
 }
 
 impl<'a> FlagParse<'a> {
-
     /// Get the parameter of a flag
     ///
     /// Will return `None` if flag was not passed or the flag did not take parameters.
@@ -221,7 +213,9 @@ impl<'a> FlagParse<'a> {
     /// parameters.
     pub fn get_flag_value<T: FromStr>(&self, long: &str) -> Option<T> {
         let pair = self.flags.iter().find(|p| p.0.long.eq(long));
-        if pair.is_none() { return None; }
+        if pair.is_none() {
+            return None;
+        }
         let pair = pair.unwrap();
 
         match &pair.1 {
@@ -249,5 +243,4 @@ impl<'a> FlagParse<'a> {
     fn add_flag_with_value(&mut self, flag: &'a Flag, value: &str) {
         self.flags.push((flag, Some(value.to_string())));
     }
-
 }

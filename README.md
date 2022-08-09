@@ -1,10 +1,12 @@
 
-# pino.rs
+<div align="center">
 
-Collection of utility crates. General theme is to be lightweight and have low
-(or no) dependencies.
+# pino_argparse
+a tiny argparsing library
 
-- `argparse`: simple cli builder library
-- `error`: error handling utilities
-- `table`: prints structs in a table format
+</div>
 
+## TODO
+
+- [ ] auto doc/help message generation?
+- [ ] iterator to give flags in order

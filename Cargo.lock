@@ -3,17 +3,5 @@
 version = 3
 
 [[package]]
-name = "argparse"
-version = "0.1.0"
-
-[[package]]
-name = "error"
-version = "0.1.0"
-
-[[package]]
-name = "pinors"
-version = "0.1.0"
-
-[[package]]
-name = "table"
+name = "pino_argparse"
 version = "0.1.0"

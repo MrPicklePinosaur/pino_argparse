@@ -1,9 +1,0 @@
-[package]
-name = "error"
-version = "0.1.0"
-edition = "2018"
-authors = ["pinosaur"]
-description = "error handling utilities"
-repository = "https://github.com/MrPicklePinosaur/pino.rs"
-
-[lib]

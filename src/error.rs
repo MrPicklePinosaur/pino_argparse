@@ -1,7 +1,6 @@
-
 use std::fmt;
 
-pub type BoxResult<T> = Result<T,Box<dyn std::error::Error>>;
+pub type BoxResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug)]
 pub enum Error {
@@ -18,4 +17,3 @@ impl fmt::Display for Error {
         write!(f, "error")
     }
 }
-

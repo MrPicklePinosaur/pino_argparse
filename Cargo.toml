@@ -1,17 +1,10 @@
 [package]
-name = "pinors"
+name = "pino_argparse"
 version = "0.1.0"
 authors = ["pinosaur"]
-description = ""
-repository = "https://github.com/MrPicklePinosaur/matsuba"
-edition = "2018"
-
-[workspace]
-members = ["crates/*"]
+description = "a tiny argparsing library"
+repository = "https://github.com/MrPicklePinosaur/pino_argparse"
+edition = "2021"
 
 [dependencies]
 
-[lib]
-name = "argparse"
-path = "crates/argparse/src/lib.rs"
-crate-type = ["lib"]
