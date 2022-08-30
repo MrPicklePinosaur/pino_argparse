@@ -2,9 +2,16 @@
 <div align="center">
 
 # pino_argparse
-a tiny argparsing library
+a tiny zero-dependency argparsing library
 
 </div>
+
+## USING IN YOUR PROJECT
+
+add the follow to your `Cargo.toml`:
+```
+pino_argparse = { git = "https://github.com/MrPicklePinosaur/pino_argparse" }
+```
 
 ## TODO
 
