@@ -9,11 +9,13 @@ use std::option::Option;
 use std::str::FromStr;
 use std::vec::Vec;
 
-use error::{BoxResult, Error};
+use error::{BoxResult, ArgParseError};
 
 /// Command handler functions take in the `FlagParse` struct which contains information on received
 /// flags.
 type HandlerFn = fn(flagparse: FlagParse) -> BoxResult<()>;
+
+pub type Result<T> = std::result::Result<T, ArgParseError>;
 
 /// Base struct to define the schema for your cli application.
 pub struct Cli {
@@ -93,7 +95,7 @@ impl Cli {
     /// Start the cli.
     ///
     /// Pass in the environment arguments.
-    pub fn run(&self, args: &Vec<String>) -> BoxResult<()> {
+    pub fn run(&self, args: &Vec<String>) -> Result<()> {
         let mut arg_it = args.iter();
         arg_it.next(); // skip program name
 
@@ -132,13 +134,13 @@ impl Cli {
 
             if flag.is_none() {
                 // TODO ugly
-                return Err(Box::new(Error::InvalidFlag));
+                return Err(ArgParseError::InvalidFlag(cur_arg.to_owned()));
             }
             let flag = flag.unwrap();
 
             // check if flag is expecting value
             if flag.parameter {
-                let value = arg_it.next().ok_or(Error::MissingFlagValue)?;
+                let value = arg_it.next().ok_or(ArgParseError::MissingFlagValue(cur_arg.to_owned()))?;
                 flagparse.add_flag_with_value(flag, value);
             } else {
                 flagparse.add_flag(flag);
@@ -157,7 +159,11 @@ impl Cli {
 
         // pass control to command handler
         let dispatch = cmd.handler;
-        dispatch(flagparse)?;
+
+        // TODO properly propogate user errors (maybe add error handler)
+        if let Err(err) = dispatch(flagparse) {
+            return Err(ArgParseError::UserError(err));
+        }
 
         Ok(())
     }
