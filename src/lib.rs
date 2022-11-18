@@ -2,6 +2,33 @@
 //!
 //! Provide a schema for your cli application and attach handlers to each command. Query for flags
 //! values with support for short and long flag names, as well as optional parameters.
+//!
+//! ```rust
+//! use pino_argparse::{Cli, Flag, FlagParse, Command};
+//!
+//! fn main() {
+//!
+//!     // Get arguments
+//!     let args = std::env::args().collect();
+//!
+//!     // Initialize the CLI
+//!     let cli = Cli {
+//!         program_name: "myprogram",
+//!         synopsis: "a simple program to show of the argparse library",
+//!         root_command: Command {
+//!             flags: vec![Flag::new("help")],
+//!             handler: |flagparse: FlagParse| -> Result<(), Box<dyn std::error::Error>> {
+//!                 println!("We called the help flag!");
+//!                 Ok(())
+//!             },
+//!             ..Default::default()
+//!         },
+//!         ..Default::default()
+//!     };
+//!
+//!     // Run the CLI
+//!     let flagparse = cli.run(&args).unwrap();
+//! }
 
 mod error;
 
