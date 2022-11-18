@@ -1,4 +1,4 @@
-//! Simple arg parsing library.
+//! A simple arg parsing library with no dependencies.
 //!
 //! Provide a schema for your cli application and attach handlers to each command. Query for flags
 //! values with support for short and long flag names, as well as optional parameters.
@@ -16,9 +16,15 @@
 //!         program_name: "myprogram",
 //!         synopsis: "a simple program to show of the argparse library",
 //!         root_command: Command {
-//!             flags: vec![Flag::new("help")],
+//!             flags: vec![
+//!                 Flag::new("help").short('h'),
+//!                 Flag::new("verbose").short('v'),
+//!             ],
 //!             handler: |flagparse: FlagParse| -> Result<(), Box<dyn std::error::Error>> {
-//!                 println!("We called the help flag!");
+//!                 if flagparse.get_flag("help") {
+//!                     println!("We called the help flag!");
+//!                 }
+//!
 //!                 Ok(())
 //!             },
 //!             ..Default::default()

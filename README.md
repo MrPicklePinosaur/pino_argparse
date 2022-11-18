@@ -4,6 +4,8 @@
 # pino_argparse
 a tiny zero-dependency argparsing library
 
+[![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](#)
+
 </div>
 
 **pino_argparse** is a bite-sized argparsing library that can handle short and
